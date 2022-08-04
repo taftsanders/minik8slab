@@ -1,0 +1,66 @@
+# Starting fields
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#spec:
+#  selector:
+#  template:
+#    spec:
+#      containers:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-test-deployment
+  labels: 
+    app: nginx
+    env: test
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+######This will set the spread of the pods across all nodes 
+######with no node having more than 1 more than pod than the other
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: node
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            os: linux
+#################################################################            
+      containers:
+        - name: nginx
+          image: 'nginx'
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 80        
+      restartPolicy: "Always"
+  replicas: 1
+  strategy:
+    type: "RollingUpdate"
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - name: "http"
+      port: 80
+      protocol: "TCP"
+      nodePort: 30080
+    - name: "https"
+      port: 443
+      protocol: "TCP"
+      nodePort: 30443
+  type: "NodePort"

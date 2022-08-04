@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: whoami
+  name: whoami
+spec:
+  progressDeadlineSeconds: 60
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  replicas: 3
+  selector:
+    matchLabels:
+      app: whoami
+  template:
+    metadata:
+      labels:
+        app: whoami
+    spec:
+      containers:
+      - image: containous/whoami:v1.5.0
+        imagePullPolicy: IfNotPresent
+        name: whoami
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: whoami
+  name: whoami
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: whoami
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami.zircon.local
+  annotations:
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: whoami.zircon.local
+    http:
+      paths:
+      - path: /data
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80
+      - path: /echo
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80
+      - path: /bench
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80

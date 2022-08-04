@@ -1,0 +1,42 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: "Host(`traefik.zircon.local`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+    middlewares:
+      - name: https-only
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-https
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: "Host(`traefik.zircon.local`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
+  tls:
+    secretName: zircon.local.certs
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: https-only
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+    port: "443"

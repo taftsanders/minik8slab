@@ -1,0 +1,10 @@
+
+1) Use `cert-manager` to create all your SSL certificates *don't need to use external DNS/HTTP challenges, use a local CA and you will be happy
+
+2) Use `vault` as your external secret manager, so this way all the secrets can be in a file encrypted that once Vault is up, you can populate all the secrets manually. Then integrate this with `external-secrets` operator and you have a great/awesome bootstrap process (https://github.com/external-secrets/external-secrets)
+
+3) NFS External Provisioner (https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner)
+
+4) Use ArgoCD to make the deployments. Create a strucuture that once ArgoCD is  implemented, all your applications will be a synced in argo
+
+5) Fairwinds RBAC manager (https://github.com/FairwindsOps/rbac-manager)

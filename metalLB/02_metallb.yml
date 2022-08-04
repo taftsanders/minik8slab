@@ -1,0 +1,14 @@
+### Load Balance Definition
+### Layer 2 ARP balance
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ namespace: metallb-system
+ name: config
+data:
+ config: |
+   address-pools:
+   - name: metal-lb-ip-space
+     protocol: layer2
+     addresses:
+     - 192.168.1.210-192.168.1.245

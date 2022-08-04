@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: whoami
+  name: whoami
+spec:
+  progressDeadlineSeconds: 60
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  replicas: 3
+  selector:
+    matchLabels:
+      app: whoami
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: whoami
+    spec:
+      containers:
+      - image: containous/whoami:v1.5.0
+        imagePullPolicy: IfNotPresent
+        name: whoami
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: whoami
+  name: whoami
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: whoami
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`whoami.zircon.local`)
+      middlewares:
+        - name: https-only 
+      kind: Rule
+      services:
+      - name: whoami
+        port: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami-https
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`whoami.zircon.local`)
+      kind: Rule
+      services:
+      - name: whoami
+        port: 80
+  tls: 
+    secretName: zircon.local.certs 
